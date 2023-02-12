@@ -1,20 +1,18 @@
-import os
-import sys
-from flask import Flask, request, jsonify, abort
-from sqlalchemy import exc, desc
-import json
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 from Models import setup_db, Contact
-
+from controllers.ContactController import setup_contact_controller
 from Auth import require_auth0
+import wtforms_json
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    
+    app.config.from_object('Config')
+    wtforms_json.init()
     setup_db(app)
     
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
     @app.after_request
     def after_request(response):
@@ -31,17 +29,24 @@ def create_app(test_config=None):
     def helloWorld():
         return "Hello World!"
     
-    @app.route('/contacts')
-    @require_auth0('read:contacts')
-    def contacts(payload):
-        contacts = Contact.query.order_by(Contact.id).all()
-        
-        contacts_length = len(contacts)
-        
+    setup_contact_controller(app)
+
+    # ERROR HANDLER
+    @app.errorhandler(400)
+    def bad_request(error):
         return jsonify({
-            "size": contacts_length,
-            "contacts": [contact.to_dict() for contact in contacts],
-        })
+            "success": False,
+            "error": 400,
+            "message": "The server cannot or will not process the request due to an apparent client error."
+        }), 400
+        
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": error.description
+        }), 500
     
     return app
 

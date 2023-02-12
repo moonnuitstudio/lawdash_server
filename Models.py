@@ -37,8 +37,9 @@ class Contact(db.Model):
     mobilenumber = Column(String(15))
     worknumber = Column(String(15))
     
-    def __init__(self, type):
-        self.type = type
+    def __init__(self, firstname, lastname):
+        self.firstname = firstname
+        self.lastname = lastname
         
     def to_dict(self):
         return {
@@ -49,3 +50,7 @@ class Contact(db.Model):
             'email': self.email,
             'dayphone': self.dayphone
         }
+        
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
