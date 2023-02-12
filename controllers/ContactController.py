@@ -47,4 +47,21 @@ def setup_contact_controller(app):
                     abort(400)
             except:
                 print( sys.exc_info() )
-                abort(400)
+                abort(500)
+                
+        @app.route('/contacts', methods=['DELETE'])
+        @csrf.exempt
+        @require_auth0('add:contacts')
+        def delete_contacts(payload):
+            try:
+                data = request.json
+                ids = data['ids']
+                
+                print(ids)
+                
+                return jsonify({
+                    "success": True,
+                })
+            except:
+                print( sys.exc_info() )
+                abort(500)
