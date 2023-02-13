@@ -35,6 +35,12 @@ def setup_contact_controller(app):
                         lastname = form.lastname.data,
                     )
                     
+                    if form.dayphone.data is not None:
+                        contact.dayphone = form.dayphone.data
+                        
+                    if form.email.data is not None:
+                        contact.email = form.email.data
+                    
                     contact.insert()
                     
                     lastest_contect = Contact.query.order_by(Contact.id.desc()).first()
@@ -51,13 +57,17 @@ def setup_contact_controller(app):
                 
         @app.route('/contacts', methods=['DELETE'])
         @csrf.exempt
-        @require_auth0('add:contacts')
+        @require_auth0('delete:contacts')
         def delete_contacts(payload):
             try:
                 data = request.json
                 ids = data['ids']
                 
-                print(ids)
+                contacts = Contact.query.filter(Contact.id.in_(ids)).all()
+                
+                for contact in contacts:
+                    contact.delete()
+                    print(id)
                 
                 return jsonify({
                     "success": True,

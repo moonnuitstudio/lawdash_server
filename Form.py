@@ -10,3 +10,11 @@ class BasicContactForm(Form):
     lastname = StringField(
         'lastname', validators=[DataRequired(), Length(-1,60)]
     )
+    dayphone = StringField(
+        'dayphone',
+        validators=[Length(-1,15),Optional()]
+    )
+    email = StringField(
+        'email',
+        validators=[Length(-1,200),Optional()]
+    )
